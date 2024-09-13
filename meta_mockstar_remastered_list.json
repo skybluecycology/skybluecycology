@@ -1,0 +1,37 @@
+{
+  "customers": {
+    "num_records": 100,
+    "columns": {
+      "CustomerID": "range(1, num_records + 1)",
+      "CustomerName": "[f'Customer_{i}' for i in range(1, num_records + 1)]",
+      "CustomerAge": "np.random.randint(18, 70, size=num_records)"
+    }
+  },
+  "products": {
+    "num_records": 50,
+    "columns": {
+      "ProductID": "range(1, num_records + 1)",
+      "ProductName": "[f'Product_{i}' for i in range(1, num_records + 1)]",
+      "ProductCategory": ["Car", "Food", "Clothes"]
+    }
+  },
+  "dates": {
+    "num_records": 365,
+    "columns": {
+      "DateKey": "range(1, num_records + 1)",
+      "Date": "pd.date_range(start='2023-01-01', periods=num_records)",
+      "Year": "pd.date_range(start='2023-01-01', periods=num_records).year",
+      "Month": "pd.date_range(start='2023-01-01', periods=num_records).month",
+      "Day": "pd.date_range(start='2023-01-01', periods=num_records).day"
+    }
+  },
+  "fact": {
+    "num_records": 1000,
+    "columns": {
+      "CustomerID": "np.random.choice(customers['CustomerID'], size=num_records)",
+      "ProductID": "np.random.choice(products['ProductID'], size=num_records)",
+      "DateKey": "np.random.choice(dates['DateKey'], size=num_records)",
+      "SalesAmount": "np.random.uniform(10.0, 1000.0, size=num_records)"
+    }
+  }
+}
