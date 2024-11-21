@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col, expr
 from functools import reduce
 
 # Initialize Spark Session
@@ -23,8 +23,9 @@ columns_to_compare = [col for col in df1.columns if col not in key_columns]
 
 # Create comparison conditions dynamically for all columns
 conditions = [
-    (col(f"df1.{col}") != col(f"df2.{col}")) | col(f"df1.{col}").isNull() | col(f"df2.{col}").isNull()
-    for col in columns_to_compare
+    (col(f"df1.{col_name}") != col(f"df2.{col_name}")) |
+    col(f"df1.{col_name}").isNull() | col(f"df2.{col_name}").isNull()
+    for col_name in columns_to_compare
 ]
 
 # Combine conditions to filter rows where differences exist
