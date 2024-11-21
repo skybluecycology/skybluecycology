@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
+from functools import reduce
 
 # Initialize Spark Session
 spark = SparkSession.builder.appName("CompareDatasets").getOrCreate()
@@ -12,7 +13,7 @@ df2 = spark.sql("SELECT * FROM database.table2")
 key_columns = ["id", "another_key_column"]  # Update with your actual key columns
 
 # Join condition
-join_condition = [df1[key] == df2[key] for key in key_columns]
+join_condition = reduce(lambda x, y: x & y, [df1[key] == df2[key] for key in key_columns])
 
 # Full outer join on the key columns to align records
 joined_df = df1.alias("df1").join(df2.alias("df2"), on=join_condition, how="full_outer")
