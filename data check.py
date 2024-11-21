@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, lit
+from pyspark.sql.functions import col
 
 # Initialize Spark Session
 spark = SparkSession.builder.appName("CompareDatasets").getOrCreate()
@@ -8,25 +8,29 @@ spark = SparkSession.builder.appName("CompareDatasets").getOrCreate()
 df1 = spark.sql("SELECT * FROM database.table1")
 df2 = spark.sql("SELECT * FROM database.table2")
 
-# Define the key column for join
-key_column = "id"
+# Define the key columns for join
+key_columns = ["id", "another_key_column"]  # Update with your actual key columns
 
-# Full outer join on the key column to align records
-joined_df = df1.alias("df1").join(df2.alias("df2"), df1[key_column] == df2[key_column], "full_outer")
+# Join condition
+join_condition = [df1[key] == df2[key] for key in key_columns]
 
-# Get the list of columns
-columns = df1.columns
+# Full outer join on the key columns to align records
+joined_df = df1.alias("df1").join(df2.alias("df2"), on=join_condition, how="full_outer")
+
+# Get the list of columns to compare (excluding the key columns)
+columns_to_compare = [col for col in df1.columns if col not in key_columns]
 
 # Create comparison conditions dynamically for all columns
 conditions = [
     (col(f"df1.{col}") != col(f"df2.{col}")) | col(f"df1.{col}").isNull() | col(f"df2.{col}").isNull()
-    for col in columns
+    for col in columns_to_compare
 ]
 
 # Combine conditions to filter rows where differences exist
-differences = joined_df.filter(
-    lit(False).select(lit(True) if cond else lit(False) for cond in conditions)
-)
+difference_filter = reduce(lambda x, y: x | y, conditions)
+
+# Apply filter to get differences
+differences = joined_df.filter(difference_filter)
 
 # Show differences
 differences.show(truncate=False)
